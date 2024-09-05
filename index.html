@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Advanced README.md Editor</title>
+  <title>README.md Editor</title>
   <style>
     * {
       margin: 0;
@@ -35,7 +35,6 @@
       font-family: 'Poppins', sans-serif;
       background-color: var(--background-color);
       color: var(--text-color);
-      line-height: 1.6;
       transition: background-color 0.3s, color 0.3s;
     }
 
@@ -53,7 +52,7 @@
       margin: 0;
     }
 
-    .theme-toggle, .save-btn, .export-btn {
+    .theme-toggle {
       position: absolute;
       top: 50%;
       right: 20px;
@@ -63,7 +62,6 @@
       background-color: transparent;
       border: none;
       color: #fff;
-      margin-left: 10px;
     }
 
     .container {
@@ -168,6 +166,27 @@
       font-size: 0.9rem;
     }
 
+    .button-container {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .button-container button {
+      margin: 0 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .button-container button:hover {
+      background-color: #0056b3;
+    }
+
     @media (max-width: 1200px) {
       .container {
         flex-direction: column;
@@ -185,10 +204,8 @@
 <body>
 
   <header>
-    <h1>Advanced README.md Editor</h1>
+    <h1>README.md Editor</h1>
     <button class="theme-toggle" id="theme-toggle">🌙</button>
-    <button class="save-btn" id="save-btn">Save</button>
-    <button class="export-btn" id="export-btn">Export as PDF</button>
   </header>
 
   <div class="container">
@@ -205,8 +222,13 @@
     </div>
   </div>
 
+  <div class="button-container">
+    <button id="save-btn">Save/Download</button>
+    <button id="clear-btn">Clear</button>
+  </div>
+
   <footer>
-    <p>&copy; 2024 Advanced README.md Editor</p>
+    <p>&copy; 2024 README.md Editor</p>
   </footer>
 
   <script>
@@ -255,36 +277,23 @@
       }
     };
 
-    // Save README to GitHub using API
+    // Save README file as a .md file
     document.getElementById('save-btn').addEventListener('click', function() {
       const markdownContent = document.getElementById('markdown-input').value;
-      const token = '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'; // Replace with your GitHub personal access token
-      const repo = 'ProgrammerKR/markdown_editor.kr'; // Replace with your GitHub repo
-      const filePath = 'README.md';
-      
-      fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `token ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: 'Update README',
-          content: btoa(markdownContent),
-          branch: 'main', // Change to your branch name if different
-        })
-      }).then(response => response.json()).then(data => {
-        alert('README saved to GitHub successfully!');
-      }).catch(error => {
-        console.error('Error saving README:', error);
-        alert('Error saving README to GitHub.');
-      });
+      const blob = new Blob([markdownContent], { type: 'text/markdown' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'README.md';
+      link.click();
     });
 
-    // Export README as PDF (dummy functionality, would need additional library)
-    document.getElementById('export-btn').addEventListener('click', function() {
-      alert('Exporting as PDF is not implemented yet.');
+    // Clear editor content
+    document.getElementById('clear-btn').addEventListener('click', function() {
+      document.getElementById('markdown-input').value = '';
+      document.getElementById('markdown-preview').innerHTML = '';
+      localStorage.removeItem('markdownContent');
     });
   </script>
+
 </body>
 </html>
