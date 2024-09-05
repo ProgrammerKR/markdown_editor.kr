@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced README.md Editor</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --background-color: #f5f7fa;
+      --text-color: #333;
+      --header-footer-bg: #24292e;
+      --editor-bg: #ffffff;
+      --editor-border: #ddd;
+      --preview-bg: #fafafa;
+      --link-color: #007bff;
+    }
+
+    .dark-theme {
+      --background-color: #1e1e1e;
+      --text-color: #ffffff;
+      --header-footer-bg: #121212;
+      --editor-bg: #2b2b2b;
+      --editor-border: #555;
+      --preview-bg: #2b2b2b;
+      --link-color: #80b3ff;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    header {
+      background-color: var(--header-footer-bg);
+      color: #ffffff;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin: 0;
+    }
+
+    .theme-toggle, .save-btn, .export-btn {
+      position: absolute;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 1.2rem;
+      background-color: transparent;
+      border: none;
+      color: #fff;
+      margin-left: 10px;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      height: calc(100vh - 80px);
+      padding: 20px;
+      gap: 20px;
+    }
+
+    .editor, .preview {
+      flex: 1;
+      background-color: var(--editor-bg);
+      border: 1px solid var(--editor-border);
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .editor h2, .preview h2 {
+      font-size: 1.4rem;
+      color: var(--text-color);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 10px;
+    }
+
+    textarea {
+      flex-grow: 1;
+      width: 100%;
+      padding: 15px;
+      font-size: 1rem;
+      font-family: 'Fira Code', monospace;
+      border: 1px solid var(--editor-border);
+      border-radius: 5px;
+      background-color: var(--editor-bg);
+      color: var(--text-color);
+      resize: none;
+      outline: none;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .preview {
+      overflow-y: auto;
+      background-color: var(--preview-bg);
+    }
+
+    .preview-content {
+      font-size: 1rem;
+      padding: 10px 0;
+    }
+
+    .preview-content h1, .preview-content h2, .preview-content h3 {
+      margin-top: 20px;
+    }
+
+    .preview-content h1 {
+      font-size: 1.8rem;
+      color: var(--link-color);
+    }
+
+    .preview-content h2 {
+      font-size: 1.5rem;
+      color: var(--link-color);
+    }
+
+    .preview-content h3 {
+      font-size: 1.2rem;
+      color: var(--text-color);
+    }
+
+    .preview-content p {
+      margin-bottom: 10px;
+    }
+
+    .preview-content code {
+      background-color: #f1f1f1;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px 0;
+      background-color: var(--header-footer-bg);
+      color: #fff;
+      position: relative;
+      bottom: 0;
+      width: 100%;
+      transition: background-color 0.3s;
+    }
+
+    footer p {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 1200px) {
+      .container {
+        flex-direction: column;
+        height: auto;
+      }
+
+      .editor, .preview {
+        width: 100%;
+        margin-bottom: 20px;
+        height: 400px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Advanced README.md Editor</h1>
+    <button class="theme-toggle" id="theme-toggle">🌙</button>
+    <button class="save-btn" id="save-btn">Save</button>
+    <button class="export-btn" id="export-btn">Export as PDF</button>
+  </header>
+
+  <div class="container">
+    <!-- Markdown Editor -->
+    <div class="editor">
+      <h2>Markdown Editor</h2>
+      <textarea id="markdown-input" placeholder="Start writing your README..."></textarea>
+    </div>
+
+    <!-- Markdown Preview -->
+    <div class="preview">
+      <h2>Live Preview</h2>
+      <div id="markdown-preview" class="preview-content"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2024 Advanced README.md Editor</p>
+  </footer>
+
+  <script>
+    // Function to convert markdown to HTML
+    function renderMarkdown(markdownText) {
+      const html = markdownText
+        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+        .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+        .replace(/\*(.*)\*/gim, '<em>$1</em>')
+        .replace(/!\[(.*?)\]\((.*?)\)/gim, "<img alt='$1' src='$2' style='max-width:100%;' />")
+        .replace(/\[(.*?)\]\((.*?)\)/gim, "<a href='$2'>$1</a>")
+        .replace(/\n$/gim, '<br />')
+        .replace(/`([^`]+)`/g, '<code>$1</code>');
+      
+      return html.trim();
+    }
+
+    // Event listener for textarea input
+    document.getElementById('markdown-input').addEventListener('input', function() {
+      const markdownText = this.value;
+      const htmlContent = renderMarkdown(markdownText);
+      document.getElementById('markdown-preview').innerHTML = htmlContent;
+
+      // Autosave functionality
+      localStorage.setItem('markdownContent', markdownText);
+    });
+
+    // Theme toggle functionality
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    let isDarkTheme = false;
+
+    themeToggleBtn.addEventListener('click', function() {
+      document.body.classList.toggle('dark-theme');
+      isDarkTheme = !isDarkTheme;
+      themeToggleBtn.textContent = isDarkTheme ? '☀️' : '🌙';
+    });
+
+    // Load autosaved content on page load
+    window.onload = function() {
+      const savedMarkdown = localStorage.getItem('markdownContent');
+      if (savedMarkdown) {
+        document.getElementById('markdown-input').value = savedMarkdown;
+        document.getElementById('markdown-preview').innerHTML = renderMarkdown(savedMarkdown);
+      }
+    };
+
+    // Save README to GitHub using API
+    document.getElementById('save-btn').addEventListener('click', function() {
+      const markdownContent = document.getElementById('markdown-input').value;
+      const token = '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'; // Replace with your GitHub personal access token
+      const repo = 'ProgrammerKR/markdown_editor.kr'; // Replace with your GitHub repo
+      const filePath = 'README.md';
+      
+      fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: 'Update README',
+          content: btoa(markdownContent),
+          branch: 'main', // Change to your branch name if different
+        })
+      }).then(response => response.json()).then(data => {
+        alert('README saved to GitHub successfully!');
+      }).catch(error => {
+        console.error('Error saving README:', error);
+        alert('Error saving README to GitHub.');
+      });
+    });
+
+    // Export README as PDF (dummy functionality, would need additional library)
+    document.getElementById('export-btn').addEventListener('click', function() {
+      alert('Exporting as PDF is not implemented yet.');
+    });
+  </script>
+</body>
+</html>
